@@ -1,4 +1,3 @@
-import { describe, it, expect, beforeEach } from "@jest/globals";
 import * as path from "path";
 import MakerInnosetup from "../src/MakerInnosetup";
 
@@ -11,18 +10,19 @@ describe("路径解析功能", () => {
   const projectDir = path.join(process.cwd(), "my-project");
   const buildDir = path.join(projectDir, "out", "my-app-win32-x64");
 
-  beforeEach(() => {
+  beforeEach(async () => {
     maker = new MakerInnosetup({
       paths: {
         projectDir: projectDir,
-        assetsDir: "assets",
+        buildDir: buildDir,
       },
       resolveRelativePaths: true,
     });
+    await maker.prepareConfig(process.platform);
   });
 
   describe("相对路径解析", () => {
-    it("应该解析相对路径为绝对路径", () => {
+    it("应该解析相对路径为绝对路径", async () => {
       const testMaker = new MakerInnosetup({
         setupIconFile: "./assets/icon.ico",
         paths: {
@@ -30,6 +30,7 @@ describe("路径解析功能", () => {
         },
         resolveRelativePaths: true,
       });
+      await maker.prepareConfig(process.platform);
 
       const resolvePath = (testMaker as any).resolvePath.bind(testMaker);
       const result = resolvePath("./assets/icon.ico", projectDir);
@@ -75,19 +76,21 @@ describe("路径解析功能", () => {
   });
 
   describe("路径占位符解析", () => {
-    beforeEach(() => {
-      // 模拟内部状态
-      (maker as any).projectDir = projectDir;
-      (maker as any).buildDir = buildDir;
+    maker = new MakerInnosetup({
+      paths: {
+        projectDir: projectDir,
+      },
     });
 
-    it("应该解析 {project} 占位符", () => {
-      const resolvePathPlaceholders = (
-        maker as any
-      ).resolvePathPlaceholders.bind(maker);
+    beforeEach(async () => {
+      await maker.prepareConfig(process.platform);
+    });
 
+    it("应该解析 {project} 占位符", async () => {
       // 输入使用正斜杠（JS中通用），测试能否正确转换为系统分隔符
-      const result = resolvePathPlaceholders("{project}/resources/icon.ico");
+      const result = (maker as any).resolvePathPlaceholders(
+        "{project}/resources/icon.ico"
+      );
 
       expect(path.normalize(result)).toBe(
         path.normalize(path.join(projectDir, "resources", "icon.ico"))
@@ -121,22 +124,19 @@ describe("路径解析功能", () => {
       );
     });
 
-    it("应该支持自定义 assets 目录", () => {
-      const customMaker = new MakerInnosetup({
+    it("应该支持自定义 assets 目录", async () => {
+      const maker = new MakerInnosetup({
         paths: {
           projectDir: projectDir,
           assetsDir: "resources",
         },
         resolveRelativePaths: true,
       });
+      await maker.prepareConfig(process.platform);
 
-      (customMaker as any).projectDir = projectDir;
-      (customMaker as any).assetsDir = "resources";
-
-      const resolvePathPlaceholders = (
-        customMaker as any
-      ).resolvePathPlaceholders.bind(customMaker);
-      const result = resolvePathPlaceholders("{assets}/icon.ico");
+      const result = (maker as any).resolvePathPlaceholders(
+        "{assets}/icon.ico"
+      );
 
       expect(path.normalize(result)).toBe(
         path.normalize(path.join(projectDir, "resources", "icon.ico"))
@@ -144,12 +144,10 @@ describe("路径解析功能", () => {
     });
 
     it("应该处理多个占位符", () => {
-      const resolvePathPlaceholders = (
-        maker as any
-      ).resolvePathPlaceholders.bind(maker);
-
       // 这种嵌套写法 {project}/{assets} 比较少见，但测试逻辑应支持
-      const result = resolvePathPlaceholders("{project}/{assets}/icon.ico");
+      const result = (maker as any).resolvePathPlaceholders(
+        "{project}/{assets}/icon.ico"
+      );
 
       expect(path.normalize(result)).toBe(
         path.normalize(path.join(projectDir, projectDir, "assets", "icon.ico"))
@@ -158,11 +156,12 @@ describe("路径解析功能", () => {
   });
 
   describe("配置路径解析", () => {
-    it("应该解析 Setup 中的路径字段", () => {
+    it("应该解析 Setup 中的路径字段", async () => {
       const testMaker = new MakerInnosetup({
         paths: { projectDir: projectDir },
         resolveRelativePaths: true,
       });
+      await testMaker.prepareConfig(process.platform);
 
       const config = {
         Setup: {
@@ -171,7 +170,6 @@ describe("路径解析功能", () => {
         },
       };
 
-      (testMaker as any).projectDir = projectDir;
       (testMaker as any).resolveConfigPaths(config, buildDir);
 
       expect(path.normalize(config.Setup.SetupIconFile)).toBe(
@@ -250,11 +248,8 @@ describe("路径解析功能", () => {
   });
 
   describe("通配符支持", () => {
-    it("应该正确处理通配符路径", () => {
-      const testMaker = new MakerInnosetup({
-        paths: { projectDir: projectDir },
-        resolveRelativePaths: true,
-      });
+    it("应该正确处理通配符路径", async () => {
+      // await testMaker.prepareConfig(process.platform);
 
       const config = {
         Files: [
@@ -265,29 +260,15 @@ describe("路径解析功能", () => {
         ],
       };
 
-      (testMaker as any).projectDir = projectDir;
-      (testMaker as any).buildDir = buildDir;
-      (testMaker as any).resolveConfigPaths(config, buildDir);
+      (maker as any).resolveConfigPaths(config, buildDir);
 
       expect(config.Files[0].Source).toContain("*");
     });
 
     it("应该处理 {build} 占位符 + 通配符", () => {
-      const testMaker = new MakerInnosetup({
-        paths: { projectDir: projectDir },
-        resolveRelativePaths: true,
-      });
-
-      (testMaker as any).projectDir = projectDir;
-      (testMaker as any).buildDir = buildDir;
-
-      const resolvePathPlaceholders = (
-        testMaker as any
-      ).resolvePathPlaceholders.bind(testMaker);
-
       // 使用通用的正斜杠作为输入，JS 在 Windows 上也能正确处理字符串
       const input = "{build}/**/*.dll";
-      const result = resolvePathPlaceholders(input);
+      const result = (maker as any).resolvePathPlaceholders(input);
 
       // 断言：结果标准化后，应该等于 buildDir 拼接通配符
       expect(path.normalize(result)).toBe(

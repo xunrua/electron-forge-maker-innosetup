@@ -2,7 +2,6 @@
  * #define 预处理器指令测试
  */
 
-import { describe, it, expect } from "@jest/globals";
 import { InnoScriptParser, InnoScriptGenerator } from "../src/index";
 
 describe("#define 预处理器", () => {

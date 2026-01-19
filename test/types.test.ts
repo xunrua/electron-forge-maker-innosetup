@@ -2,12 +2,7 @@
  * 类型测试文件 - 确保所有类型定义正确
  */
 
-import { describe, it, expect } from "@jest/globals";
-import MakerInnosetup, {
-  MakerInnosetupConfig,
-  InnoSetupConfig,
-} from "../src/index";
-import type { ForgePlatform } from "@electron-forge/shared-types";
+import MakerInnosetup, { MakerInnosetupConfig } from "../src/index";
 
 describe("类型定义测试", () => {
   it("应该支持基本配置", () => {

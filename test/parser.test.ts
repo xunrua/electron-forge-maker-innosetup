@@ -2,7 +2,6 @@
  * ISS 解析器测试
  */
 
-import { describe, it, expect } from "@jest/globals";
 import { MakerInnosetup, InnoScriptParser } from "../src/index";
 
 describe("ISS 解析器", () => {
