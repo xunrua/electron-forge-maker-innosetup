@@ -15,26 +15,28 @@ export default class MakerInnosetup extends MakerBase<MakerInnosetupConfig> {
   defaultPlatforms: ForgePlatform[] = ["win32"];
 
   private scriptGenerator: InnoScriptGenerator;
-
+  private buildDir: string | undefined;
+  private projectDir: string | undefined;
+  private assetsDir: string | undefined;
   /**
    * 获取项目根目录
    */
   private getProjectDir(): string {
-    return this.config?.paths?.projectDir || process.cwd();
+    return this.projectDir || this.config?.paths?.projectDir || process.cwd();
   }
 
   /**
    * 获取构建目录
    */
   private getBuildDir(): string | undefined {
-    return this.config?.paths?.buildDir;
+    return this.buildDir || this.config?.paths?.buildDir;
   }
 
   /**
    * 获取资源目录
    */
   private getAssetsDir(): string {
-    return this.config?.paths?.assetsDir || "assets";
+    return this.assetsDir || this.config?.paths?.assetsDir || "assets";
   }
 
   constructor(config: MakerInnosetupConfig = {}, platforms?: ForgePlatform[]) {
@@ -43,7 +45,6 @@ export default class MakerInnosetup extends MakerBase<MakerInnosetupConfig> {
       config.resolveRelativePaths = true;
     }
     super(config, platforms);
-
     this.scriptGenerator = new InnoScriptGenerator();
   }
 
@@ -630,11 +631,6 @@ export default class MakerInnosetup extends MakerBase<MakerInnosetupConfig> {
    */
   async make(options: MakerOptions): Promise<string[]> {
     const { appName, dir, makeDir, targetArch, packageJSON } = options;
-    this.config.config = {
-      buildDir: dir,
-      ...this.config.config,
-    };
-    // 设置默认构建目录
     const appVersion = packageJSON.version || "1.0.0";
     const archId = this.getArchIdentifier(targetArch);
 
