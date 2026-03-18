@@ -13,26 +13,17 @@ npm install --save-dev electron-forge-maker-innosetup
 ### 导入方式
 
 ```typescript
-// 命名导入（推荐）
+// 命名导入
 import { MakerInnosetup } from "electron-forge-maker-innosetup";
 
 // 默认导入
 import MakerInnosetup from "electron-forge-maker-innosetup";
 
 // 导入解析器
-import {
-  MakerInnosetup,
-  InnoScriptParser,
-} from "electron-forge-maker-innosetup";
+import { MakerInnosetup, InnoScriptParser } from "electron-forge-maker-innosetup";
 ```
 
-### 🎉 方式一：使用相对路径
-
-**为什么推荐？**
-
-- **可移植** - 配置可在不同机器间共享
-- **团队协作** - 每个开发者的路径可以不同
-- **CI/CD 友好** - 自动化构建无需修改配置
+### 方式一：使用相对路径
 
 在 `forge.config.ts` 中：
 
@@ -105,9 +96,11 @@ export default config;
 
 #### 支持的路径占位符
 
-- `{project}` - 项目根目录
-- `{build}` - Electron Forge 打包输出目录
-- `{assets}` - 资源文件目录（默认为 `assets`）
+| 占位符      | 说明                        | 示例                           |
+| ----------- | --------------------------- | ------------------------------ |
+| `{project}` | 项目根目录                  | `{project}/resources/icon.ico` |
+| `{build}`   | Electron Forge 打包输出目录 | `{build}\\*`                   |
+| `{assets}`  | 资源目录（默认为 `assets`） | `{assets}/icons/icon.ico`      |
 
 示例：
 
@@ -134,11 +127,11 @@ new MakerInnosetup({
 });
 ```
 
-> 📖 **详细文档：**[docs/path-resolution.md](docs/path-resolution.md) - 查看完整的路径解析指南，包括更多示例和最佳实践
+详细文档：[docs/path-resolution.md](docs/path-resolution.md)
 
 ### 方式二：使用绝对路径
 
-如果您坚持使用绝对路径，可以禁用自动解析：
+如果需要使用绝对路径，可以禁用自动解析：
 
 ```typescript
 import type { ForgeConfig } from "@electron-forge/shared-types";
@@ -285,7 +278,7 @@ const config: MakerInnosetupConfig = {
 
 ### 使用自定义 Innosetup 脚本
 
-如果您已有现成的 `.iss` 脚本文件：
+如果已有现成的 `.iss` 脚本文件：
 
 #### 方法 1: 直接使用 ISS 文件
 
@@ -296,7 +289,6 @@ const config: MakerInnosetupConfig = {
     scriptPath: './installer.iss'
   }
 }
-
 ```
 
 #### 方法 2: 解析 ISS 文件为配置
@@ -323,30 +315,30 @@ const forgeConfig: ForgeConfig = {
 };
 ```
 
-> 📝 **详细文档**: 查看 [iss-parser.md](./docs/iss-parser.md) 了解 ISS 解析器的完整使用方法
+详细文档：[iss-parser.md](./docs/iss-parser.md)
 
-> ⚠️ **重要**: 如果你的 ISS 脚本中定义了 `OutputDir`，Maker 会自动解析并在正确的目录中查找安装包。详见 [custom-script-output.md](./docs/custom-script-output.md)
+注意：如果 ISS 脚本中定义了 `OutputDir`，Maker 会自动解析并在正确的目录中查找安装包。详见 [custom-script-output.md](./docs/custom-script-output.md)
 
 ## 配置选项
 
 ### MakerInnosetupConfig
 
-| 选项                    | 类型              | 默认值                    | 说明                                    |
-| ----------------------- | ----------------- | ------------------------- | --------------------------------------- |
-| `config`                | `InnoSetupConfig` | -                         | 完整的 Innosetup 配置对象               |
-| `scriptPath`            | `string`          | -                         | 自定义脚本路径（如果提供则忽略 config） |
-| `innosetupPath`         | `string`          | 自动查找                  | Innosetup 编译器路径                    |
-| `outputDir`             | `string`          | `./out/innosetup.windows` | 输出目录                                |
-| `appName`               | `string`          | -                         | 应用程序名称                            |
-| `appVersion`            | `string`          | -                         | 应用程序版本                            |
-| `appPublisher`          | `string`          | -                         | 应用程序发布者                          |
-| `appId`                 | `string`          | -                         | 应用程序唯一 ID                         |
-| `licenseFile`           | `string`          | -                         | 许可证文件路径                          |
-| `setupIconFile`         | `string`          | -                         | 安装图标文件路径                        |
-| `createDesktopIcon`     | `boolean`         | `false`                   | 是否创建桌面图标                        |
-| `createQuickLaunchIcon` | `boolean`         | `false`                   | 是否创建快速启动图标                    |
-| `gui`                   | `boolean`         | `false`                   | 是否使用 GUI 模式编译                   |
-| `isccOptions`           | `string[]`        | -                         | 额外的 ISCC 命令行参数                  |
+| 选项                    | 类型              | 默认值                               | 说明                                    |
+| ----------------------- | ----------------- | ------------------------------------ | --------------------------------------- |
+| `config`                | `InnoSetupConfig` | -                                    | 完整的 Innosetup 配置对象               |
+| `scriptPath`            | `string`          | -                                    | 自定义脚本路径（如果提供则忽略 config） |
+| `innosetupPath`         | `string`          | 自动查找                             | Innosetup 编译器路径                    |
+| `outputDir`             | `string`          | `{makeDir}/innosetup.windows/{arch}` | 输出目录（可选）                        |
+| `appName`               | `string`          | -                                    | 应用程序名称                            |
+| `appVersion`            | `string`          | -                                    | 应用程序版本                            |
+| `appPublisher`          | `string`          | -                                    | 应用程序发布者                          |
+| `appId`                 | `string`          | -                                    | 应用程序唯一 ID                         |
+| `licenseFile`           | `string`          | -                                    | 许可证文件路径                          |
+| `setupIconFile`         | `string`          | -                                    | 安装图标文件路径                        |
+| `createDesktopIcon`     | `boolean`         | `false`                              | 是否创建桌面图标                        |
+| `createQuickLaunchIcon` | `boolean`         | `false`                              | 是否创建快速启动图标                    |
+| `gui`                   | `boolean`         | `false`                              | 是否使用 GUI 模式编译                   |
+| `isccOptions`           | `string[]`        | -                                    | 额外的 ISCC 命令行参数                  |
 
 ### InnoSetupConfig
 
@@ -433,12 +425,6 @@ AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 ```
-
-**优势：**
-
-- 🔄 更易维护：集中管理常量，修改一处即可
-- 📖 更清晰：生成的 ISS 脚本更具可读性
-- 🔧 更灵活：支持 Inno Setup 原生的预处理器功能
 
 ### 添加自定义 Pascal 代码
 

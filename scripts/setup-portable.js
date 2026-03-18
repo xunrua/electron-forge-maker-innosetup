@@ -74,14 +74,9 @@ if (fs.existsSync(sourceLangPath)) {
     fs.mkdirSync(destLangPath, { recursive: true });
   }
 
-  const langFiles = fs
-    .readdirSync(sourceLangPath)
-    .filter((f) => f.endsWith(".isl"));
+  const langFiles = fs.readdirSync(sourceLangPath).filter((f) => f.endsWith(".isl"));
   for (const langFile of langFiles) {
-    fs.copyFileSync(
-      path.join(sourceLangPath, langFile),
-      path.join(destLangPath, langFile)
-    );
+    fs.copyFileSync(path.join(sourceLangPath, langFile), path.join(destLangPath, langFile));
   }
   console.log(
     "\x1b[90m%s\x1b[0m",
@@ -114,7 +109,4 @@ function getDirectorySize(dirPath) {
 const totalSize = getDirectorySize(vendorPath) / (1024 * 1024);
 console.log("\x1b[90m%s\x1b[0m", `Total size: ${totalSize.toFixed(2)} MB`);
 console.log("");
-console.log(
-  "\x1b[32m%s\x1b[0m",
-  "You can now use the maker without system-installed Innosetup!"
-);
+console.log("\x1b[32m%s\x1b[0m", "You can now use the maker without system-installed Innosetup!");

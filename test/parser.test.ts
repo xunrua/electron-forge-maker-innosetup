@@ -1,10 +1,10 @@
 /**
- * ISS 解析器测试
+ * ISS Parser Tests
  */
 
 import { MakerInnosetup, InnoScriptParser } from "../src/index";
 
-describe("ISS 解析器", () => {
+describe("ISS Parser", () => {
   const sampleIss = `
 ; Sample Inno Setup Script
 
@@ -51,25 +51,25 @@ begin
 end;
 `;
 
-  it("应该能够解析 ISS 内容", () => {
+  it("should parse ISS content", () => {
     const config = InnoScriptParser.parse(sampleIss);
 
     expect(config).toBeDefined();
     expect(config.Setup).toBeDefined();
-    expect(config.Setup?.AppName).toBe("My Application");
-    expect(config.Setup?.AppVersion).toBe("1.0.0");
-    expect(config.Setup?.AppPublisher).toBe("My Company");
+    expect(config.Setup.AppName).toBe("My Application");
+    expect(config.Setup.AppVersion).toBe("1.0.0");
+    expect(config.Setup.AppPublisher).toBe("My Company");
   });
 
-  it("应该能够通过 fromIssContent 创建 Maker 配置", () => {
+  it("should create Maker config from ISS content", () => {
     const makerConfig = MakerInnosetup.fromIssContent(sampleIss);
 
     expect(makerConfig).toBeDefined();
     expect(makerConfig.config).toBeDefined();
-    expect(makerConfig.config?.Setup?.AppName).toBe("My Application");
+    expect(makerConfig.config?.Setup.AppName).toBe("My Application");
   });
 
-  it("应该能够创建 MakerInnosetup 实例", () => {
+  it("should create MakerInnosetup instance", () => {
     const maker = new MakerInnosetup({
       appName: "TestApp",
       appVersion: "1.0.0",
@@ -79,35 +79,44 @@ end;
     expect(maker.name).toBe("innosetup");
   });
 
-  it("应该正确解析 Languages 部分", () => {
+  it("should parse Languages section", () => {
     const config = InnoScriptParser.parse(sampleIss);
 
     expect(config.Languages).toBeDefined();
     expect(config.Languages?.length).toBe(2);
-    expect(config.Languages?.[0].Name).toBe("english");
-    expect(config.Languages?.[1].Name).toBe("chinesesimplified");
+    expect(config.Languages?.[0]?.Name).toBe("english");
+    expect(config.Languages?.[1]?.Name).toBe("chinesesimplified");
   });
 
-  it("应该正确解析 Files 部分", () => {
+  it("should parse Files section", () => {
     const config = InnoScriptParser.parse(sampleIss);
 
     expect(config.Files).toBeDefined();
     expect(config.Files?.length).toBeGreaterThan(0);
-    expect(config.Files?.[0].Source).toContain("{src}");
-    expect(config.Files?.[0].DestDir).toBe("{app}");
+    expect(config.Files?.[0]?.Source).toContain("{src}");
+    expect(config.Files?.[0]?.DestDir).toBe("{app}");
   });
 
-  it("应该正确解析 Icons 部分", () => {
+  it("should parse Icons section", () => {
     const config = InnoScriptParser.parse(sampleIss);
 
     expect(config.Icons).toBeDefined();
     expect(config.Icons?.length).toBe(2);
   });
 
-  it("应该正确解析 Code 部分", () => {
+  it("should parse Code section", () => {
     const config = InnoScriptParser.parse(sampleIss);
 
     expect(config.Code).toBeDefined();
     expect(config.Code).toContain("InitializeSetup");
+  });
+
+  it("should throw ParseError for missing required fields", () => {
+    const invalidIss = `
+[Setup]
+Compression=lzma2
+`;
+
+    expect(() => InnoScriptParser.parse(invalidIss)).toThrow();
   });
 });
