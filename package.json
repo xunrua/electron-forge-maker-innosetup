@@ -1,6 +1,6 @@
 {
   "name": "electron-forge-maker-innosetup",
-  "version": "1.0.0",
+  "version": "0.3.3",
   "description": "An Electron Forge maker for creating Windows installers using Inno Setup with full TypeScript support",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
